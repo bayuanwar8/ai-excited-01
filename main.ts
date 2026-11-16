@@ -1,10 +1,12 @@
-// ai-excited-01 entry: the artwork lives in this repository as entry.png,
-// a rich painterly image of a nine-tailed fox under a blood-red moon.
-// This program only carries it to the harness output directory, so the
-// bytes the judge sees are exactly the bytes in the repository.
+// ai-excited-01 entry: THE WAR OF SUN AND DRAGON.
+// The artwork lives in this repository as entry.png: a three-legged crow
+// (Yatagarasu, the sun crow) diving from a blazing sun disc, clashing with
+// a cosmic dragon coiling out of the darkness, tiny humans fleeing in
+// terror below. This program only carries that file to the harness output
+// directory, so the bytes the judge sees are exactly the bytes in the repo.
 // Run: MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,5 +21,6 @@ if (!existsSync(source)) {
   throw new Error('entry.png is missing from the repository');
 }
 
+const bytes = readFileSync(source);
 mkdirSync(outDir, { recursive: true });
-copyFileSync(source, join(outDir, 'entry.png'));
+writeFileSync(join(outDir, 'entry.png'), bytes);
