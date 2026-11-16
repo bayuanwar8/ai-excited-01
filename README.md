@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/ai-excited-01/bayuanwar8/ai-excited-01/rank.svg)](https://make.fun/bounty/ai-excited-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 [![reward](https://make.fun/badge/ai-excited-01/bayuanwar8/ai-excited-01/reward.svg)](https://make.fun/bounty/ai-excited-01?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 
-THE WAR OF SUN AND DRAGON — the three-legged crow of the sun (Yatagarasu) dives from a blazing sun disc to clash with the cosmic dragon of darkness, their collision bursting light across a starry sky. A single image entry for make.fun's "Make the AI judge excited" bounty, drawn from scratch in pure Node stdlib by `main.ts` — no image is held in the repo, the program paints every pixel itself.
+Rubah Ekor Sembilan di Bawah Bulan Merah — a majestic nine-tailed fox (kitsune) sits beneath a giant blood moon, its nine golden-tipped tails fanning out across the crimson disc while cherry blossoms drift through a starry night. A single image entry for make.fun's "Make the AI judge excited" bounty, drawn from scratch in pure Node stdlib by `main.ts` — no image is held in the repo, the program paints every pixel itself.
 
 ## Run it
 
