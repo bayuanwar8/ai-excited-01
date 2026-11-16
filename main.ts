@@ -265,33 +265,46 @@ function drawSun() {
 }
 
 // ---------- the collision burst (drawn BEFORE the creatures, so their
-// legs, talons and the dragon's head stay visible silhouetted on the glow) ----------
+// legs, talons and the dragon's head stay visible silhouetted on the glow).
+// Deliberately NO circles and NO rings: an irregular starburst with wildly
+// varying ray lengths and a soft feathered core, so it can never read as a
+// target or a second sun. ----------
 function drawBurst() {
   const cx = 615;
   const cy = 515;
-  disc(cx, cy, 180, [255, 180, 60], 0.22, 50); // outer glow
-  disc(cx, cy, 100, [255, 150, 40], 0.75, 8);
-  for (let i = 0; i < 16; i++) {
-    const ang = (i * 22.5 + (i % 2) * 8) * Math.PI / 180;
-    const len = i % 2 ? 130 : 190;
-    const bx = cx + Math.cos(ang) * 60;
-    const by = cy + Math.sin(ang) * 60;
-    const tx = cx + Math.cos(ang) * len;
-    const ty = cy + Math.sin(ang) * len;
-    const px = -Math.sin(ang) * 9;
-    const py = Math.cos(ang) * 9;
-    poly([[bx + px, by + py], [tx, ty], [bx - px, by - py]], [255, 200, 80], 0.65);
+  disc(cx, cy, 210, [255, 180, 60], 0.20, 70); // outer glow, soft
+  disc(cx, cy, 115, [255, 150, 40], 0.45, 30); // mid glow, soft
+  // irregular rays: fixed lengths, angles and widths, no two alike
+  const rays = [
+    { a: -168, l: 150, w: 12 }, { a: -142, l: 235, w: 9 }, { a: -118, l: 125, w: 16 },
+    { a: -96, l: 260, w: 10 }, { a: -70, l: 165, w: 18 }, { a: -44, l: 240, w: 8 },
+    { a: -20, l: 140, w: 15 }, { a: 4, l: 275, w: 9 }, { a: 28, l: 155, w: 17 },
+    { a: 52, l: 225, w: 10 }, { a: 78, l: 135, w: 14 }, { a: 102, l: 250, w: 9 },
+    { a: 128, l: 170, w: 16 }, { a: 154, l: 215, w: 11 },
+  ];
+  for (const r of rays) {
+    const ang = (r.a * Math.PI) / 180;
+    const bx = cx + Math.cos(ang) * 55;
+    const by = cy + Math.sin(ang) * 55;
+    const tx = cx + Math.cos(ang) * r.l;
+    const ty = cy + Math.sin(ang) * r.l;
+    const px = -Math.sin(ang) * r.w;
+    const py = Math.cos(ang) * r.w;
+    poly([[bx + px, by + py], [tx, ty], [bx - px, by - py]], [255, 200, 80], 0.6);
   }
-  disc(cx, cy, 48, [255, 240, 190], 1, 4);
-  disc(cx, cy, 26, [255, 255, 255], 1, 2);
-  for (const rr of [120, 160]) {
-    const ring = [];
-    for (let i = 0; i <= 72; i++) {
-      const t = (i / 72) * Math.PI * 2;
-      ring.push([cx + Math.cos(t) * rr, cy + Math.sin(t) * rr]);
-    }
-    stroke(ring, 4, GOLD, 0.5);
-  }
+  // hot core: soft and feathered, no hard rim
+  disc(cx, cy, 72, [255, 230, 150], 0.95, 18);
+  disc(cx, cy, 38, [255, 255, 255], 1, 10);
+  // gold shards flying out of the collision
+  const shards = [
+    [[700, 420], [760, 380], [742, 428]],
+    [[540, 430], [500, 372], [556, 446]],
+    [[700, 610], [762, 648], [716, 566]],
+    [[530, 600], [478, 652], [556, 566]],
+    [[760, 500], [838, 500], [768, 534]],
+    [[470, 520], [396, 540], [478, 556]],
+  ];
+  for (const s of shards) poly(s, [255, 205, 90], 0.9);
   // embers flying out of the collision
   for (let i = 0; i < 130; i++) {
     const ang = rand() * Math.PI * 2;
@@ -304,168 +317,225 @@ function drawBurst() {
 }
 
 // ---------- the three-legged crow (Yatagarasu) ----------
-// Dives from the sun toward the burst. Black silhouette with a gold rim on
-// the sun side. One solid swept wing (not finger-like feathers), a head that
-// clearly protrudes with its beak aimed at the burst, and THREE legs,
-// clearly separated, talons gripping lightning.
-const WING = [[420, 320], [330, 210], [240, 140], [185, 105], [225, 175], [205, 190], [265, 240], [245, 258], [320, 300], [305, 318], [400, 345]];
-function crowPartGold(shiftX, shiftY) {
-  // gold under-copy, shifted toward the sun so a gold crescent shows
-  const g = (pts) => poly(pts.map((p) => [p[0] + shiftX, p[1] + shiftY]), GOLD, 1);
-  g(WING);
-  // tail feathers trailing back
-  for (const ang of [-162, -147, -132]) {
-    const rad = (ang * Math.PI) / 180;
-    const cx = 330 + Math.cos(rad) * 52;
-    const cy = 385 + Math.sin(rad) * 52;
-    g(ellipsePts(cx, cy, 95, 14, ang));
-  }
-  g(ellipsePts(430, 345, 140, 55, -28)); // body
-  g(ellipsePts(565, 420, 42, 38, -20)); // head
-}
-function crowPartBlack() {
-  poly(WING, INK, 1);
-  for (const ang of [-162, -147, -132]) {
-    const rad = (ang * Math.PI) / 180;
-    const cx = 330 + Math.cos(rad) * 52;
-    const cy = 385 + Math.sin(rad) * 52;
-    poly(ellipsePts(cx, cy, 95, 14, ang), INK, 1);
-  }
-  poly(ellipsePts(430, 345, 140, 55, -28), INK, 1); // body
-  poly(ellipsePts(565, 420, 42, 38, -20), INK, 1); // head
-  // long beak, pointed down-right at the burst
-  poly([[592, 402], [618, 488], [568, 438]], INK, 1);
-  stroke([[594, 406], [612, 480]], 3, GOLD, 0.9); // gold beak edge
-  // eye: gold glint
-  disc(572, 408, 6, [255, 200, 60], 1, 1);
-  disc(573, 408, 2.5, [0, 0, 0], 1, 0.5);
+// Dives from the sun toward the burst: one coherent bird, not a blob.
+// Sleek body angled nose-down, a BIG head with a long beak aimed at the
+// dragon, a tall notched wing, a fanned tail, and THREE thick legs with
+// gold rims and gold talons, fanned wide and backlit on the burst glow so
+// each leg counts even at 300px.
+const CROW_BODY = { cx: 450, cy: 355, rx: 140, ry: 56, rot: -25 };
+const CROW_HEAD = { cx: 568, cy: 422, rx: 58, ry: 52, rot: -25 };
+const CROW_WING_UP = [[440, 320], [395, 225], [360, 150], [400, 180], [445, 245], [485, 305], [520, 360]];
+const CROW_WING_LOW = [[455, 400], [380, 465], [305, 515], [335, 498], [360, 518], [390, 495], [425, 465]];
+const CROW_BEAK = [[612, 400], [685, 500], [622, 462]];
+// Solid tail fan (one piece, two shallow notches): a fan of separate
+// feathers read as a hand on the bright sun, a solid fan reads as a tail.
+const CROW_TAIL = [[340, 285], [240, 230], [220, 245], [255, 265], [235, 280], [270, 295], [255, 315], [310, 325], [345, 320]];
+function crowBodyShapes(col, dx, dy) {
+  const shift = (pts) => pts.map((p) => [p[0] + dx, p[1] + dy]);
+  poly(shift(CROW_WING_UP), col, 1);
+  poly(shift(CROW_WING_LOW), col, 1);
+  poly(shift(CROW_TAIL), col, 1);
+  poly(ellipsePts(CROW_BODY.cx + dx, CROW_BODY.cy + dy, CROW_BODY.rx, CROW_BODY.ry, CROW_BODY.rot), col, 1);
+  poly(ellipsePts(CROW_HEAD.cx + dx, CROW_HEAD.cy + dy, CROW_HEAD.rx, CROW_HEAD.ry, CROW_HEAD.rot), col, 1);
+  poly(shift(CROW_BEAK), col, 1);
 }
 function crowLegs() {
-  // three legs, clearly separated and spread wide so all three read even
-  // at 300px, talons open around the lightning
+  // three legs: thick black bars with a gold rim (a wider gold under-stroke
+  // beneath the black stroke), fanned wide, talons open around the bolt.
+  // Each leg is ~21px wide with ~60px gaps: countable even at 300px.
   const legs = [
-    { from: [472, 392], mid: [510, 425], foot: [545, 450] },
-    { from: [498, 408], mid: [535, 455], foot: [575, 495] },
-    { from: [522, 418], mid: [565, 465], foot: [615, 505] },
+    { from: [478, 420], mid: [500, 485], foot: [530, 545] },
+    { from: [512, 432], mid: [558, 500], foot: [608, 565] },
+    { from: [545, 438], mid: [625, 500], foot: [700, 545] },
   ];
   for (const leg of legs) {
-    stroke([leg.from, leg.mid, leg.foot], 11, INK, 1);
+    stroke([leg.from, leg.mid, leg.foot], 30, GOLD, 1);
+    stroke([leg.from, leg.mid, leg.foot], 21, INK, 1);
     // three gold talon claws fanning from each foot
-    for (const [dx, dy] of [[16, 13], [5, 18], [-8, 16]]) {
-      stroke([[leg.foot[0], leg.foot[1]], [leg.foot[0] + dx, leg.foot[1] + dy]], 3, GOLD, 1);
+    for (const [dx, dy] of [[-24, 16], [0, 27], [24, 15]]) {
+      stroke([[leg.foot[0], leg.foot[1]], [leg.foot[0] + dx, leg.foot[1] + dy]], 5, GOLD, 1);
     }
   }
 }
 function drawCrow() {
-  crowPartGold(-7, -7);
-  crowPartBlack();
+  crowBodyShapes(GOLD, -9, -9); // gold under-copy, shifted toward the sun: a gold rim
+  // gold under-beak, slightly larger than the black beak: a gold outline
+  poly([[606, 396], [692, 504], [620, 468]], GOLD, 1);
+  crowBodyShapes(INK, 0, 0);
+  // gold lower edge of the beak
+  stroke([[625, 455], [680, 495]], 3, GOLD, 0.9);
+  // eye: gold glint, big enough to read
+  disc(578, 408, 8, [255, 200, 60], 1, 1);
+  disc(579, 408, 3.5, [0, 0, 0], 1, 0.5);
   crowLegs();
 }
 
 // ---------- the cosmic dragon ----------
-// Serpentine body coiling in from the dark lower-right toward the burst.
+// A dragon, not a worm: a segmented armored body (dark separator bands,
+// pale segmented belly, tall gold-tipped dorsal spines), a thick muscular
+// mid-body tapering to neck and tail, a BIG horned head with an open
+// glowing jaw and fangs, and two clawed legs reaching for the fight.
 function dragonSpine() {
   const segs = [
-    [[980, 990], [840, 910], [790, 770]],
-    [[790, 770], [900, 660], [820, 560]],
-    [[820, 560], [730, 470], [700, 470]],
+    [[990, 1005], [860, 920], [800, 790]],
+    [[800, 790], [910, 680], [840, 570]],
+    [[840, 570], [820, 550], [800, 545]],
   ];
   const pts = [];
   for (const [p0, p1, p2] of segs) pts.push(...qbezPts(p0, p1, p2, 20));
   return pts;
 }
+function dragonRadius(t) {
+  // muscular mid-body, tapering to neck and tail
+  return 26 + 40 * Math.pow(Math.sin(Math.PI * clamp(0.05 + 0.95 * t, 0, 1)), 0.8);
+}
 function drawDragon() {
   const pts = dragonSpine();
   const n = pts.length;
+  const rad = (i) => dragonRadius(i / (n - 1));
+  const tangent = (i) => {
+    const a = pts[Math.max(0, i - 1)];
+    const b = pts[Math.min(n - 1, i + 1)];
+    const tx = b[0] - a[0];
+    const ty = b[1] - a[1];
+    const len = Math.hypot(tx, ty) || 1;
+    return [tx / len, ty / len];
+  };
   // dark outline ribbon so the body reads against the sky
+  for (let i = 0; i < n; i++) disc(pts[i][0], pts[i][1], rad(i) + 6, [16, 10, 44], 1, 2);
+  // tapering body
+  for (let i = 0; i < n; i++) disc(pts[i][0], pts[i][1], rad(i), DRAGON, 1, 2);
+  // rim light on the burst side (upper-right edge)
+  const rim = [];
   for (let i = 0; i < n; i++) {
-    const r = lerp(58, 30, i / (n - 1)) + 5;
-    disc(pts[i][0], pts[i][1], r, [16, 10, 44], 1, 2);
+    const [tx, ty] = tangent(i);
+    rim.push([pts[i][0] + (-ty) * rad(i) * 0.75, pts[i][1] + tx * rad(i) * 0.75]);
   }
-  // tapering body: thick discs, tail thick, neck thinner
-  for (let i = 0; i < n; i++) {
-    const r = lerp(58, 30, i / (n - 1));
-    disc(pts[i][0], pts[i][1], r, DRAGON, 1, 2);
+  stroke(rim, 5, DRAGON_RIM, 0.5);
+  // armor segment separators: dark bands across the body
+  for (let i = 6; i < n - 2; i += 12) {
+    const [tx, ty] = tangent(i);
+    const r = rad(i);
+    stroke(
+      [[pts[i][0] - ty * r * 0.95, pts[i][1] + tx * r * 0.95], [pts[i][0] + ty * r * 0.95, pts[i][1] - tx * r * 0.95]],
+      7, [20, 12, 50], 0.9,
+    );
   }
-  // belly highlight along the inner curve
+  // pale segmented belly along the lower-left side
   const belly = [];
   for (let i = 0; i < n; i++) {
-    const a = pts[Math.max(0, i - 1)];
-    const b = pts[Math.min(n - 1, i + 1)];
-    const tx = b[0] - a[0];
-    const ty = b[1] - a[1];
-    const len = Math.hypot(tx, ty) || 1;
-    const r = lerp(58, 30, i / (n - 1));
-    belly.push([pts[i][0] + (-ty / len) * r * 0.35, pts[i][1] + (tx / len) * r * 0.35]);
+    const [tx, ty] = tangent(i);
+    belly.push([pts[i][0] + ty * rad(i) * 0.45, pts[i][1] - tx * rad(i) * 0.45]);
   }
-  stroke(belly, 22, DRAGON_BELLY, 0.7);
-  // scales: faint dots along the body
-  for (let i = 0; i < 70; i++) {
-    const idx = Math.floor(rand() * n);
-    const r = lerp(58, 30, idx / (n - 1));
-    const off = (rand() - 0.5) * r * 1.4;
-    disc(pts[idx][0] + off, pts[idx][1] + (rand() - 0.5) * r, 2 + rand() * 2.5, DRAGON_SCALE, 0.3, 1);
+  stroke(belly, 26, [150, 130, 235], 0.8);
+  for (let i = 6; i < n - 2; i += 12) {
+    const [tx, ty] = tangent(i);
+    const r = rad(i);
+    const bx = pts[i][0] + ty * r * 0.45;
+    const by = pts[i][1] - tx * r * 0.45;
+    stroke(
+      [[bx - ty * r * 0.4, by + tx * r * 0.4], [bx + ty * r * 0.4, by - tx * r * 0.4]],
+      5, [30, 20, 70], 0.9,
+    );
   }
-  // spine spikes on the outer edge
-  for (let i = 6; i < n - 4; i += 7) {
-    const a = pts[Math.max(0, i - 1)];
-    const b = pts[Math.min(n - 1, i + 1)];
-    const tx = b[0] - a[0];
-    const ty = b[1] - a[1];
-    const len = Math.hypot(tx, ty) || 1;
-    const r = lerp(58, 30, i / (n - 1));
-    const ox = (ty / len) * r;
-    const oy = (-tx / len) * r;
-    const bx = pts[i][0] + ox;
-    const by = pts[i][1] + oy;
-    poly([[bx - 8, by - 4], [bx + ox * 0.55, by + oy * 0.55], [bx + 8, by + 4]], [20, 14, 52], 1);
+  // dorsal spines: tall triangles with gold tips along the upper-right edge
+  for (let i = 4; i < n - 2; i += 9) {
+    const [tx, ty] = tangent(i);
+    const r = rad(i);
+    const nx = -ty;
+    const ny = tx;
+    const bx = pts[i][0] + nx * r * 0.8;
+    const by = pts[i][1] + ny * r * 0.8;
+    const tipx = pts[i][0] + nx * (r + 36);
+    const tipy = pts[i][1] + ny * (r + 36);
+    poly([[bx - tx * 10, by - ty * 10], [tipx, tipy], [bx + tx * 10, by + ty * 10]], [22, 14, 54], 1);
+    poly(
+      [[tipx - tx * 5 - nx * 10, tipy - ty * 5 - ny * 10], [tipx, tipy], [tipx + tx * 5 - nx * 10, tipy + ty * 5 - ny * 10]],
+      GOLD, 1,
+    );
   }
-  // claws: two small feet gripping along the body
-  for (const [fx, fy, dir] of [[830, 600, 1], [790, 760, -1]]) {
-    for (const off of [-14, 0, 14]) {
-      stroke([[fx + off * 0.4, fy], [fx + off * 0.4 + dir * 22, fy + 26]], 4, [16, 10, 44], 1);
-      disc(fx + off * 0.4 + dir * 22, fy + 26, 2.5, GOLD, 1, 0.5);
+  // tail spade
+  const tp = pts[0];
+  const [ttx, tty] = tangent(0);
+  poly(
+    [[tp[0] - tty * 16, tp[1] + ttx * 16], [tp[0] - ttx * 60, tp[1] - tty * 60], [tp[0] + tty * 16, tp[1] - ttx * 16]],
+    [22, 14, 54], 1,
+  );
+  // clawed legs: gold-rimmed limbs reaching for the fight, big gold claws
+  const dragonLegs = [
+    { from: [795, 575], mid: [760, 625], foot: [730, 670] },
+    { from: [830, 720], mid: [800, 770], foot: [770, 815] },
+  ];
+  for (const leg of dragonLegs) {
+    stroke([leg.from, leg.mid, leg.foot], 30, GOLD, 1);
+    stroke([leg.from, leg.mid, leg.foot], 22, DRAGON, 1);
+    stroke([[leg.from[0] + 6, leg.from[1]], [leg.mid[0] + 6, leg.mid[1]], [leg.foot[0] + 6, leg.foot[1]]], 8, DRAGON_BELLY, 0.7);
+    for (const [dx, dy] of [[-30, 8], [-16, 26], [2, 30], [20, 22]]) {
+      stroke([[leg.foot[0], leg.foot[1]], [leg.foot[0] + dx, leg.foot[1] + dy]], 5, GOLD, 1);
     }
   }
-  // head: big horned wedge pointing at the burst, jaw open, mouth glowing
-  disc(628, 492, 16, [255, 120, 30], 0.9, 4); // mouth glow first
-  poly([[700, 470], [640, 448], [600, 470], [618, 500], [660, 512], [700, 500]], DRAGON, 1); // skull
-  poly([[660, 512], [618, 500], [598, 518], [628, 534], [668, 528]], DRAGON, 1); // lower jaw
-  // horns sweeping back
-  stroke(qbezPts([672, 452], [724, 414], [772, 420], 16), 9, DRAGON_RIM, 1);
-  stroke(qbezPts([688, 464], [738, 442], [780, 458], 16), 8, DRAGON_RIM, 1);
-  // teeth
-  for (const [tx, ty] of [[622, 476], [636, 482], [650, 490]]) {
-    poly([[tx - 4, ty], [tx + 4, ty + 2], [tx, ty + 10]], [255, 255, 255], 1);
+  // head: BIG angular skull, open glowing jaw, fangs, branched horns.
+  // Kept clear of the crow's beak tip (678, 498): the snout stops at
+  // (725, 525) with a gap of bright burst glow between the two fighters.
+  disc(765, 560, 18, [255, 90, 25], 0.85, 5); // mouth glow first
+  poly([[725, 525], [770, 490], [830, 488], [868, 520], [855, 560], [800, 575], [745, 555]], DRAGON, 1); // skull
+  poly([[770, 560], [740, 540], [730, 555], [765, 580], [815, 585], [840, 565]], DRAGON, 1); // lower jaw
+  // big horns sweeping back, gold-tipped, one branched
+  stroke(qbezPts([830, 495], [880, 450], [915, 455], 16), 15, DRAGON_RIM, 1);
+  stroke(qbezPts([880, 452], [905, 420], [915, 412], 12), 8, DRAGON_RIM, 1);
+  stroke(qbezPts([840, 520], [890, 495], [920, 500], 16), 13, DRAGON_RIM, 1);
+  disc(915, 455, 7, GOLD, 1, 1);
+  disc(920, 500, 6, GOLD, 1, 1);
+  disc(915, 412, 4, GOLD, 1, 1);
+  // upper fangs pointing down, lower fangs pointing up
+  for (const [fx, fy] of [[745, 545], [770, 550], [795, 555]]) {
+    poly([[fx - 5, fy], [fx + 5, fy + 2], [fx, fy + 18]], [255, 255, 255], 1);
   }
-  // whiskers trailing back from the snout
-  stroke(qbezPts([606, 482], [560, 450], [518, 442], 16), 3, DRAGON_RIM, 0.8);
-  stroke(qbezPts([610, 500], [568, 524], [528, 536], 16), 3, DRAGON_RIM, 0.8);
-  // glowing cyan eye with slit pupil
-  disc(652, 478, 18, EYE_CYAN, 0.25, 6);
-  disc(652, 478, 9, EYE_CYAN, 1, 1);
-  stroke([[652, 470], [652, 486]], 3, [0, 0, 0], 1);
-  disc(612, 474, 3, [255, 140, 40], 1, 0.5); // nostril ember
+  for (const [fx, fy] of [[755, 568], [780, 572]]) {
+    poly([[fx - 4, fy], [fx + 4, fy], [fx, fy - 14]], [255, 255, 255], 1);
+  }
+  // whiskers trailing from the snout
+  stroke(qbezPts([728, 532], [680, 510], [640, 500], 16), 3, DRAGON_RIM, 0.8);
+  stroke(qbezPts([732, 548], [690, 570], [655, 585], 16), 3, DRAGON_RIM, 0.8);
+  // glowing cyan eye with slit pupil, brow ridge above
+  disc(785, 520, 22, EYE_CYAN, 0.3, 7);
+  disc(785, 520, 13, EYE_CYAN, 1, 1);
+  stroke([[785, 510], [785, 530]], 4, [0, 0, 0], 1);
+  stroke([[765, 505], [805, 500]], 6, [20, 12, 50], 1);
+  disc(732, 530, 3, [255, 140, 40], 1, 0.5); // nostril ember
 }
 
-// ---------- lightning the crow hurls ----------
+// ---------- lightning the crow hurls: a long jagged bolt striking down
+// from the talons to the mountain ridge ----------
 function drawBolt() {
-  const bolt = [[575, 492], [600, 515], [578, 540], [602, 565], [590, 595]];
-  stroke(bolt, 10, GOLD_DEEP, 0.95);
-  stroke(bolt, 4, [255, 250, 220], 1);
+  const bolt = [[612, 566], [640, 600], [615, 630], [645, 665], [620, 705], [650, 745], [625, 790], [648, 830], [622, 870]];
+  stroke(bolt, 12, GOLD_DEEP, 0.95);
+  stroke(bolt, 5, [255, 250, 220], 1);
 }
 
-// ---------- foreground: mountain ridges + a small torii for scale ----------
+// ---------- foreground: mountain ridges, a BIG torii and pines ----------
+// The bottom third was empty before. The ridges are higher now, the torii
+// is a real landmark (not a speck), and pines ground the composition.
 function drawForeground() {
-  poly([[0, 1024], [0, 950], [180, 905], [380, 955], [560, 910], [760, 960], [1024, 920], [1024, 1024]], [8, 5, 18], 1);
-  poly([[0, 1024], [0, 990], [240, 960], [480, 1000], [720, 965], [1024, 995], [1024, 1024]], [5, 3, 12], 1);
-  // torii gate, tiny and dark, bottom centre
+  // back ridge, higher than before
+  poly([[0, 1024], [0, 935], [170, 875], [370, 925], [560, 870], [760, 930], [1024, 885], [1024, 1024]], [8, 5, 18], 1);
+  // front ridge
+  poly([[0, 1024], [0, 985], [240, 950], [480, 995], [720, 955], [1024, 990], [1024, 1024]], [5, 3, 12], 1);
+  // pines standing on the back ridge
+  const PINES = [[120, 893, 1.0], [280, 902, 0.8], [680, 906, 1.1], [900, 906, 0.9]];
+  for (const [px, py, s] of PINES) {
+    poly([[px - 4 * s, py], [px + 4 * s, py], [px, py - 14 * s]], [6, 4, 14], 1); // trunk
+    poly([[px - 26 * s, py - 12 * s], [px + 26 * s, py - 12 * s], [px, py - 38 * s]], [6, 4, 14], 1);
+    poly([[px - 20 * s, py - 30 * s], [px + 20 * s, py - 30 * s], [px, py - 52 * s]], [6, 4, 14], 1);
+    poly([[px - 13 * s, py - 46 * s], [px + 13 * s, py - 46 * s], [px, py - 64 * s]], [6, 4, 14], 1);
+  }
+  // torii gate, big and readable, bottom centre
   const TORII = [22, 14, 40];
-  poly([[470, 1000], [470, 940], [482, 940], [482, 1000]], TORII, 1);
-  poly([[542, 1000], [542, 940], [554, 940], [554, 1000]], TORII, 1);
-  poly([[455, 938], [569, 938], [560, 952], [464, 952]], TORII, 1);
-  poly([[468, 962], [556, 962], [556, 972], [468, 972]], TORII, 1);
-  stroke([[455, 938], [569, 938]], 2, GOLD, 0.5);
+  poly([[448, 1024], [448, 862], [466, 862], [466, 1024]], TORII, 1);
+  poly([[558, 1024], [558, 862], [576, 862], [576, 1024]], TORII, 1);
+  poly([[425, 860], [599, 860], [590, 878], [434, 878]], TORII, 1);
+  poly([[440, 900], [584, 900], [584, 914], [440, 914]], TORII, 1);
+  stroke([[425, 860], [599, 860]], 3, GOLD, 0.6);
 }
 
 // ---------- vignette: darken the corners so the centre hits harder ----------
