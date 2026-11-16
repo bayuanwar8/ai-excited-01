@@ -24,6 +24,10 @@ if (!existsSync(source)) {
   throw new Error('entry.png is missing from the repository');
 }
 
+// Read + write the bytes explicitly instead of copyFileSync, so the file
+// that lands in the output directory is byte-for-byte the buffer we read
+// from the repository — no silent truncation or partial copy can slip
+// through unnoticed.
 const bytes = readFileSync(source);
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, 'entry.png'), bytes);
